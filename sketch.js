@@ -1,67 +1,146 @@
-var canvas;
-var music,edges;
-var box, block1,block2,block3,block4;
+var path,boy,cash,diamonds,jwellery,sword;
+var pathImg,boyImg,cashImg,diamondsImg,jwelleryImg,swordImg;
+var treasureCollection = 0;
+var cashG,diamondsG,jwelleryG,swordGroup;
+
+//Game States
+var PLAY=1;
+var END=0;
+var gameState=1;
 
 function preload(){
-    music = loadSound("music.mp3");
+  pathImg = loadImage("Road.png");
+  boyImg = loadAnimation("Runner-1.png","Runner-2.png");
+  cashImg = loadImage("cash.png");
+  diamondsImg = loadImage("diamonds.png");
+  jwelleryImg = loadImage("jwell.png");
+  swordImg = loadImage("sword.png");
+  endImg =loadAnimation("gameOver.png");
 }
 
-
 function setup(){
-    canvas = createCanvas(800,600);
+  
+  createCanvas(400,600);
+// Moving background
+path=createSprite(200,200);
+path.addImage(pathImg);
+path.velocityY = 6;
 
-    //create 4 different surfaces
-    block1=createSprite(120,550,150,20);
-    block1.shapeColor="violet";
-    block2=createSprite(310,550,150,20);
-    block2.shapeColor="green";
-    block3=createSprite(490,550,150,20);
-    block3.shapeColor="red";
-    block4=createSprite(670,550,150,20)
-    block4.shapeColor="yellow";
-    //create box sprite and give velocity
-box=createSprite(random(10,800),10,10,10);
-box.velocityY=5;
-box.velocityX=4;
-//music.play();
 
-edges=createEdgeSprites();
+//creating boy running
+boy = createSprite(70,580,20,20);
+boy.addAnimation("SahilRunning",boyImg);
+boy.scale=0.08;
+  
+  
+cashG=new Group();
+diamondsG=new Group();
+jwelleryG=new Group();
+swordGroup=new Group();
 
 }
 
 function draw() {
-    background(0);
-    if(box.isTouching(edges[0]) || box.isTouching(edges[1]) || box.isTouching(edges[2]) || box.isTouching(edges[3])){
-        box.bounceOff(edges[0]);
-        box.bounceOff(edges[1]);
-        box.bounceOff(edges[2]);
-        box.bounceOff(edges[3]);
 
+  if(gameState===PLAY){
+  background(0);
+  boy.x = World.mouseX;
+  
+  edges= createEdgeSprites();
+  boy.collide(edges);
+  
+  //code to reset the background
+  if(path.y > 400 ){
+    path.y = height/2;
+  }
+  
+    createCash();
+    createDiamonds();
+    createJwellery();
+    createSword();
+
+    if (cashG.isTouching(boy)) {
+      cashG.destroyEach();
+      treasureCollection=treasureCollection+50;
     }
-    if(block1.isTouching(box) && box.bounceOff(block1)){
-        box.shapeColor = "violet";
-        music.play();
+    else if (diamondsG.isTouching(boy)) {
+      diamondsG.destroyEach();
+      treasureCollection=treasureCollection+100;
+      
+    }else if(jwelleryG.isTouching(boy)) {
+      jwelleryG.destroyEach();
+      treasureCollection= treasureCollection + 150;
+      
+    }else{
+      if(swordGroup.isTouching(boy)) {
+        gameState=END;
+        
+        boy.addAnimation("SahilRunning",endImg);
+        boy.x=200;
+        boy.y=300;
+        boy.scale=0.6;
+        
+        cashG.destroyEach();
+        diamondsG.destroyEach();
+        jwelleryG.destroyEach();
+        swordGroup.destroyEach();
+        
+        cashG.setVelocityYEach(0);
+        diamondsG.setVelocityYEach(0);
+        jwelleryG.setVelocityYEach(0);
+        swordGroup.setVelocityYEach(0);
+     
     }
+  }
+  
+  drawSprites();
+  textSize(20);
+  fill(255);
+  text("Treasure: "+ treasureCollection,150,30);
+  }
 
-    if(block2.isTouching(box) && box.bounceOff(block2)){
-        box.shapeColor = "green";
-        music.play();
-    }
+}
 
-    if(block3.isTouching(box) && box.bounceOff(block3)){
-        box.shapeColor = "red";
-        box.velocityX = 0;
-        box.velocityY = 0;
-        music.stop();
-    }
+function createCash() {
+  if (World.frameCount % 200 == 0) {
+  var cash = createSprite(Math.round(random(50, 350),40, 10, 10));
+  cash.addImage(cashImg);
+  cash.scale=0.12;
+  cash.velocityY = 3;
+  cash.lifetime = 150;
+  cashG.add(cash);
+  }
+}
 
-    if(block4.isTouching(box) && box.bounceOff(block4)){
-        box.shapeColor = "yellow";
-        music.play();
-    }
-    
+function createDiamonds() {
+  if (World.frameCount % 320 == 0) {
+  var diamonds = createSprite(Math.round(random(50, 350),40, 10, 10));
+  diamonds.addImage(diamondsImg);
+  diamonds.scale=0.03;
+  diamonds.velocityY = 3;
+  diamonds.lifetime = 150;
+  diamondsG.add(diamonds);
+}
+}
 
-drawSprites();
+function createJwellery() {
+  if (World.frameCount % 410 == 0) {
+  var jwellery = createSprite(Math.round(random(50, 350),40, 10, 10));
+  jwellery.addImage(jwelleryImg);
+  jwellery.scale=0.13;
+  jwellery.velocityY = 3;
+  jwellery.lifetime = 150;
+  jwelleryG.add(jwellery);
+  }
+}
 
-    //add condition to check if box touching surface and make it box
+function createSword(){
+  if (World.frameCount % 530 == 0) {
+  var sword = createSprite(Math.round(random(50, 350),40, 10, 10));
+  sword.addImage(swordImg);
+  sword.scale=0.1;
+  sword.velocityY = 3;
+  sword.lifetime = 150;
+  swordGroup.add(sword);
+  }
 }
